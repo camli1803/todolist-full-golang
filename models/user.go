@@ -12,7 +12,7 @@ type User struct {
 	gorm.Model
 	UserName string `gorm:"column:username;not null"`
 	Email    string `gorm:"column:email;not null;unique"`
-	PassWord string `gorm:"column:password;not null"`
+	Password string `gorm:"column:password;not null"`
 	Todos    []Todo
 }
 
@@ -20,16 +20,16 @@ type User struct {
 type UserInfoSignUp struct {
 	UserName string `json:"username" validate:"required,max=100"`
 	Email    string `json:"email" validate:"required,email"`
-	PassWord string `json:"password" validate:"required,min=8"`
+	Password string `json:"password" validate:"required,min=8"`
 }
 
 type UserInfoSignIn struct {
 	Email    string `json:"email" validate:"required,email"`
-	PassWord string `json:"password" validate:"required,min=8"`
+	Password string `json:"password" validate:"required,min=8"`
 }
 
 type UserResponse struct {
-	ID        uint      `json:"id"`
+	ID        uint64    `json:"id"`
 	UserName  string    `json:"username"`
 	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"created_at"`
@@ -41,7 +41,7 @@ type UserUpdateRequest struct {
 }
 
 type ChangePasswordRequest struct {
-	PassWord string `json:"password" validate:"required,min=8"`
+	Password string `json:"password" validate:"required,min=8"`
 }
 
 // Create new user

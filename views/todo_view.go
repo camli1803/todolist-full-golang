@@ -3,6 +3,7 @@ package views
 import (
 	"net/http"
 	"strconv"
+	"strings"
 	"todolist/controllers"
 	"todolist/models"
 
@@ -33,24 +34,22 @@ func CreateTodosByUserID(c echo.Context) error {
 	return c.JSON(http.StatusOK, "success")
 }
 
-func GetAllTodosCompletedByUserID(c echo.Context) error {
+func GetAllTodosByDoneUserID(c echo.Context) error {
 	userID, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
-	todosRes, err := controllers.GetAllTodosCompletedByUserID(userID)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
+	done := c.QueryParam("done")
+	var donebool bool
+	if strings.EqualFold(done, "true") {
+		donebool = true
+	} else if strings.EqualFold(done, "false") {
+		donebool = false
+	} else {
+		return c.JSON(http.StatusBadRequest, "done must be true or false")
 	}
-	return c.JSON(http.StatusOK, todosRes)
-}
 
-func GetAllTodosUnFinishedByUserID(c echo.Context) error {
-	userID, err := strconv.ParseUint(c.Param("id"), 10, 64)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
-	}
-	todosRes, err := controllers.GetAllTodosUnFinishedByUserID(userID)
+	todosRes, err := controllers.GetAllTodosByDoneUserID(userID, donebool)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}

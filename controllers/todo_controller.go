@@ -9,21 +9,14 @@ func CreateTodos(userID uint64, todoCreateRequest models.TodoCreateRequest) erro
 	todo.Content = todoCreateRequest.Content
 	todo.Done = todoCreateRequest.Done
 	todo.UserID = userID
-
-	err := models.CreateTodos(todo)
-	return err
+	return models.CreateTodos(todo)
 }
 
-func GetAllTodosCompletedByUserID(userID uint64) (todosRes []models.TodoResponse, err error) {
-	todos, err := models.GetAllTodosCompletedByUserID(userID)
-	for _, todo := range todos {
-		todosRes = append(todosRes, convertTodoEntityToTodoResponse(todo))
+func GetAllTodosByDoneUserID(userID uint64, done bool) (todosRes []models.TodoResponse, err error) {
+	todos, err := models.GetAllTodosByDoneUserID(userID, done)
+	if err != nil {
+		return nil, err
 	}
-	return todosRes, err
-}
-
-func GetAllTodosUnFinishedByUserID(userID uint64) (todosRes []models.TodoResponse, err error) {
-	todos, err := models.GetAllTodosUnFinishedByUserID(userID)
 	for _, todo := range todos {
 		todosRes = append(todosRes, convertTodoEntityToTodoResponse(todo))
 	}
@@ -40,13 +33,11 @@ func UpdateATodoByUserIDTodoID(userID uint64, todoID uint64, todoUpdateRequest m
 	var todo models.Todo
 	todo.Content = todoUpdateRequest.Content
 	todo.Done = todoUpdateRequest.Done
-	err := models.UpdateATodoByUserIDTodoID(userID, todoID, todo)
-	return err
+	return models.UpdateATodoByUserIDTodoID(userID, todoID, todo)
 }
 
 func DeleteATodoByUserIDTodoID(userID uint64, todoID uint64) error {
-	err := models.DeleteATodoByUserIDTodoID(userID, todoID)
-	return err
+	return models.DeleteATodoByUserIDTodoID(userID, todoID)
 }
 
 func convertTodoEntityToTodoResponse(todo models.Todo) (todoResponse models.TodoResponse) {

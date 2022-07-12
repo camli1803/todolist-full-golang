@@ -38,13 +38,8 @@ func CreateTodos(todo Todo) error {
 	return result.Error
 }
 
-func GetAllTodosCompletedByUserID(userID uint64) (todos []Todo, err error) {
-	result := database.DB.Where("userid = ? AND done = ?", userID, true).Find(&todos)
-	return todos, result.Error
-}
-
-func GetAllTodosUnFinishedByUserID(userID uint64) (todos []Todo, err error) {
-	result := database.DB.Where("userid = ? AND done = ?", userID, false).Find(&todos)
+func GetAllTodosByDoneUserID(userID uint64, done bool) (todos []Todo, err error) {
+	result := database.DB.Where("userid = ? AND done = ?", userID, done).Find(&todos)
 	return todos, result.Error
 }
 

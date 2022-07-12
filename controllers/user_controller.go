@@ -12,7 +12,7 @@ func SignUp(userInfo models.UserInfoSignUp) error {
 	var user models.User
 	user.UserName = userInfo.UserName
 	user.Email = userInfo.Email
-	user.PassWord = userInfo.PassWord
+	user.Password = userInfo.Password
 	err := models.Create(user)
 	return err
 }
@@ -23,7 +23,7 @@ func SignIn(userInfo models.UserInfoSignIn) (string, error) {
 		err = fmt.Errorf("email is incorrect")
 		return "", err
 	}
-	if userInfo.PassWord != user.PassWord {
+	if userInfo.Password != user.Password {
 		err = fmt.Errorf("password is incorrect")
 		return "", err
 	}
@@ -48,7 +48,7 @@ func UpdateUserByID(id uint64, userUpdateRequest models.UserUpdateRequest) error
 
 func ChangePasswordByID(id uint64, changePasswordReq models.ChangePasswordRequest) error {
 	var user models.User
-	user.PassWord = changePasswordReq.PassWord
+	user.Password = changePasswordReq.Password
 	err := models.UpdateUserByID(id, user)
 	return err
 }
@@ -59,7 +59,7 @@ func DeleteUserByID(id uint64) error {
 }
 
 func convertUserEntityToUserResponse(user models.User) (userResponse models.UserResponse) {
-	userResponse.ID = user.ID
+	userResponse.ID = uint64(user.ID)
 	userResponse.UserName = user.UserName
 	userResponse.Email = user.Email
 	userResponse.CreatedAt = user.CreatedAt
