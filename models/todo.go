@@ -16,12 +16,12 @@ type Todo struct {
 }
 
 type TodoCreateRequest struct {
-	Content string `json:"content" validate:"required"`
+	Content string `json:"content" validate:"required,todo_content"`
 	Done    bool   `json:"done"`
 }
 
 type TodoUpdateRequest struct {
-	Content string `json:"content"`
+	Content string `json:"content" validate:"required,todo_content"`
 	Done    bool   `json:"done"`
 }
 

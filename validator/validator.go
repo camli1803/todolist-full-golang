@@ -1,20 +1,22 @@
 package validator
 
 import (
-	"net/http"
-
-	"github.com/go-playground/validator/v10"
-	"github.com/labstack/echo/v4"
+	validator "github.com/go-playground/validator/v10"
 )
 
 type CustomValidator struct {
 	Validator *validator.Validate
 }
 
+func (*CustomValidator) New() *validator.Validate {
+	var customValidator CustomValidator
+	customValidator.Validator = validator.New()
+
+	customValidator.Validator.RegisterValidation("password", IsFormatPassword)
+	customValidator.Validator.RegisterValidation("todo_content", IsTodoContent)
+	
+	return customValidator.Validator
+}
 func (cv *CustomValidator) Validate(i interface{}) error {
-	if err := cv.Validator.Struct(i); err != nil {
-		// Optionally, you could return the error to give each route more control over the status code
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	return nil
+	return cv.Validator.Struct(i)
 }

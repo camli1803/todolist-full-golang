@@ -3,18 +3,21 @@ package main
 import (
 	"net/http"
 	"todolist/database"
+	"todolist/middleware"
 	"todolist/migrations"
+	todolist_validator "todolist/validator"
 	"todolist/views"
 
-	todolist_validator "todolist/validator"
-
-	"todolist/middleware"
-
-	goplayground_validator "github.com/go-playground/validator/v10"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 )
 
 func main() {
+	err := godotenv.Load("tmp/.env")
+	if err != nil {
+		panic("load file .env failed")
+	}
+
 	DB, err := database.ConnectDB()
 	if err != nil {
 		panic("failed to connect database")
@@ -24,31 +27,37 @@ func main() {
 		return
 	}
 	e := echo.New()
-	e.Validator = &todolist_validator.CustomValidator{Validator: goplayground_validator.New()}
+
+	var customValidator todolist_validator.CustomValidator
+	validate := customValidator.New()
+	e.Validator = &todolist_validator.CustomValidator{Validator: validate}
 
 	// api
 	e.GET("/", homepage)
 
-	userApi := e.Group("/users")
+	userApi := e.Group("/auth")
 	{
 		//public api
-		userApi.POST("/signUp", views.SignUp)
-		userApi.POST("/signIn", views.SignIn)
+		userApi.POST("/signup", views.SignUp)
+		userApi.POST("/signin", views.SignIn)
+		userApi.PATCH("/reset_forgot_password", views.ResetForgotPassword)
 
 		// private api
-		userApi.GET("/:id", views.GetUserByID, middleware.CheckAuthentication, middleware.CheckAuthorization)
-		userApi.PATCH("/:id", views.UpdateUserByID, middleware.CheckAuthentication, middleware.CheckAuthorization)
-		userApi.PATCH("/:id/changePassword", views.ChangePasswordByID, middleware.CheckAuthentication, middleware.CheckAuthorization)
-		userApi.DELETE("/:id", views.DeleteUserByID, middleware.CheckAuthentication, middleware.CheckAuthorization)
+		userApiPrivate := userApi.Group("/users/:id")
+		userApiPrivate.Use(middleware.CheckAuthentication, middleware.CheckAuthorization)
+		userApiPrivate.GET("", views.GetUserByID)
+		userApiPrivate.PATCH("", views.UpdateUserByID)
+		userApiPrivate.PATCH("/change_password", views.ChangePasswordByID)
+		userApiPrivate.DELETE("", views.DeleteUserByID)
 
 		// todo api
-		todoApi := userApi.Group("/:id/todos")
-		todoApi.GET("", views.GetAllTodosByUserID, middleware.CheckAuthentication, middleware.CheckAuthorization)
-		todoApi.POST("", views.CreateTodosByUserID, middleware.CheckAuthentication, middleware.CheckAuthorization)
-		todoApi.GET("/show_by_done", views.GetAllTodosByDoneUserID, middleware.CheckAuthentication, middleware.CheckAuthorization)
-		todoApi.GET("/:todo_id", views.GetATodoByUserIDTodoID, middleware.CheckAuthentication, middleware.CheckAuthorization)
-		todoApi.PATCH("/:todo_id", views.UpdateATodoByUserIDTodoID, middleware.CheckAuthentication, middleware.CheckAuthorization)
-		todoApi.DELETE("/:todo_id", views.DeleteATodoByUserIDTodoID, middleware.CheckAuthentication, middleware.CheckAuthorization)
+		todoApi := userApiPrivate.Group("/todos")
+		todoApi.GET("", views.GetAllTodosByUserID)
+		todoApi.POST("", views.CreateTodosByUserID)
+		todoApi.GET("/show_by_done", views.GetAllTodosByDoneUserID)
+		todoApi.GET("/:todo_id", views.GetATodoByUserIDTodoID)
+		todoApi.PATCH("/:todo_id", views.UpdateATodoByUserIDTodoID)
+		todoApi.DELETE("/:todo_id", views.DeleteATodoByUserIDTodoID)
 	}
 
 	e.Logger.Fatal(e.Start(":1710"))

@@ -20,17 +20,27 @@ func SignUp(userInfo models.UserInfoSignUp) error {
 func SignIn(userInfo models.UserInfoSignIn) (string, error) {
 	user, err := models.TakeUserByEmail(userInfo.Email)
 	if err != nil {
-		err = fmt.Errorf("email is incorrect")
+		err = fmt.Errorf("your email is incorrect")
 		return "", err
 	}
 	if userInfo.Password != user.Password {
-		err = fmt.Errorf("password is incorrect")
+		err = fmt.Errorf("your password is incorrect")
 		return "", err
 	}
 
 	// create token
 	token, err := jwt.Create(user.ID, user.Email)
 	return token, err
+}
+
+func ResetForgotPassword(userResetPassword models.UserResetPasswordRequest) error {
+	user, err := models.TakeUserByEmail(userResetPassword.Email)
+	if err != nil {
+		return err
+	}
+
+	user.Password = userResetPassword.NewPassword
+	return models.UpdateUserByID(uint64(user.ID), user)
 }
 
 func GetUserByID(id uint64) (models.UserResponse, error) {
@@ -48,9 +58,21 @@ func UpdateUserByID(id uint64, userUpdateRequest models.UserUpdateRequest) error
 
 func ChangePasswordByID(id uint64, changePasswordReq models.ChangePasswordRequest) error {
 	var user models.User
-	user.Password = changePasswordReq.Password
-	err := models.UpdateUserByID(id, user)
-	return err
+	user, err := models.TakeUserByID(id)
+	if err != nil {
+		return err
+	}
+	if changePasswordReq.CurrentPassword != user.Password {
+		return fmt.Errorf("your current password is incorrect")
+	}
+
+	if changePasswordReq.NewPassword == changePasswordReq.CurrentPassword {
+		return fmt.Errorf("your password has not been changed")
+	}
+
+	user.Password = changePasswordReq.NewPassword
+
+	return models.UpdateUserByID(id, user)
 }
 
 func DeleteUserByID(id uint64) error {

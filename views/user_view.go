@@ -1,6 +1,7 @@
 package views
 
 import (
+	"fmt"
 	"net/http"
 	"todolist/controllers"
 	"todolist/models"
@@ -26,7 +27,7 @@ func SignUp(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusCreated, "success")
+	return c.JSON(http.StatusCreated, "your account has been registered")
 }
 
 func SignIn(c echo.Context) error {
@@ -44,6 +45,31 @@ func SignIn(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, token)
+}
+
+func ResetForgotPassword(c echo.Context) error {
+	var userResetPassword models.UserResetPasswordRequest
+	err := c.Bind(&userResetPassword)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	err = c.Validate(userResetPassword)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	err = controllers.ResetForgotPassword(userResetPassword)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			err = fmt.Errorf("your email is invalid")
+			return c.JSON(http.StatusBadRequest, err.Error())
+		}
+
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, "your password has been reset")
 }
 
 // get user by id
@@ -82,7 +108,7 @@ func UpdateUserByID(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK, "success")
+	return c.JSON(http.StatusOK, "your account has been changed")
 }
 
 // Change Password
@@ -107,7 +133,7 @@ func ChangePasswordByID(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK, "success")
+	return c.JSON(http.StatusOK, "your password has been changed")
 }
 
 // Delete user
@@ -121,7 +147,7 @@ func DeleteUserByID(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK, "success")
+	return c.JSON(http.StatusOK, "your account has been deleted")
 }
 
 // todo api

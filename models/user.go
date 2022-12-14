@@ -20,7 +20,7 @@ type User struct {
 type UserInfoSignUp struct {
 	UserName string `json:"username" validate:"required,max=100"`
 	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=8"`
+	Password string `json:"password" validate:"required,password"`
 }
 
 type UserInfoSignIn struct {
@@ -28,6 +28,10 @@ type UserInfoSignIn struct {
 	Password string `json:"password" validate:"required,min=8"`
 }
 
+type UserResetPasswordRequest struct {
+	Email       string `json:"email" validate:"required,email"`
+	NewPassword string `json:"new_password" validate:"required,password"`
+}
 type UserResponse struct {
 	ID        uint64    `json:"id"`
 	UserName  string    `json:"username"`
@@ -41,7 +45,8 @@ type UserUpdateRequest struct {
 }
 
 type ChangePasswordRequest struct {
-	Password string `json:"password" validate:"required,min=8"`
+	CurrentPassword string `json:"current_password" validate:"required"`
+	NewPassword     string `json:"new_password" validate:"required,password"`
 }
 
 // Create new user

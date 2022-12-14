@@ -29,7 +29,5 @@ go.work
 /Godeps/
 
 # End of https://www.toptal.com/developers/gitignore/api/go
-go.mod
-go.sum
 todolist.db
 tmp/

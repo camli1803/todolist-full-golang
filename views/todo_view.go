@@ -31,7 +31,7 @@ func CreateTodosByUserID(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK, "success")
+	return c.JSON(http.StatusOK, "todo has been created")
 }
 
 func GetAllTodosByDoneUserID(c echo.Context) error {
@@ -90,11 +90,16 @@ func UpdateATodoByUserIDTodoID(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
+	err = c.Validate(todoUpdateRequest)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
 	err = controllers.UpdateATodoByUserIDTodoID(userID, todoID, todoUpdateRequest)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK, "success")
+	return c.JSON(http.StatusOK, "todo has been updated")
 }
 
 func DeleteATodoByUserIDTodoID(c echo.Context) error {
@@ -111,5 +116,5 @@ func DeleteATodoByUserIDTodoID(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK, "success")
+	return c.JSON(http.StatusOK, "todo has been deleted")
 }
